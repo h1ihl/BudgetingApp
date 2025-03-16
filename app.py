@@ -44,6 +44,20 @@ def home():
     ]
     chart_json = json.dumps(chart_data, ensure_ascii=False)
 
+    # Compute category breakdown for expenses
+    category_breakdown = {}
+    for t in transactions:
+        if t.type.lower() == 'expense':
+            category = t.category
+            if category in category_breakdown:
+                category_breakdown[category] += t.amount
+            else:
+                category_breakdown[category] = t.amount
+
+    # Prepare data for the pie chart
+    category_data = [{"category": cat, "amount": amt} for cat, amt in category_breakdown.items()]
+    category_json = json.dumps(category_data, ensure_ascii=False)
+
     print("DEBUG: Chart JSON Data:", chart_json)
 
     return render_template(
@@ -53,8 +67,10 @@ def home():
         total_expense=total_expense,
         net_balance=net_balance,
         chart_json=chart_json,
-        type_filter=type_filter  # Pass the current filter to the template
+        type_filter=type_filter,  # Pass the current filter to the template
+        category_json=category_json  # Pass the category breakdown data
     )
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_transaction():

@@ -51,6 +51,26 @@
         }
     </script>
 
+    <!-- Expense Breakdown Pie Chart -->
+    <h2>Expenses by Category</h2>
+    <div id="pie-chart"></div>
+    <script>
+        var categoryData = {{ category_json | safe }};
+        console.log("Category Data Debug:", categoryData);
+
+        if (Array.isArray(categoryData) && categoryData.length > 0) {
+            var pieData = [{
+                labels: categoryData.map(d => d.category),
+                values: categoryData.map(d => d.amount),
+                type: 'pie'
+            }];
+
+            Plotly.newPlot('pie-chart', pieData, { title: 'Expenses by Category' });
+        } else {
+            console.error("categoryData is not valid:", categoryData);
+        }
+    </script>
+
     <h2>Transactions</h2>
     {% if transactions %}
         <ul>
