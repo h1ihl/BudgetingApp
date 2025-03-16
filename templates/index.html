@@ -98,7 +98,7 @@
     <h2 class="transactions-title">Transactions</h2>
     {% if grouped_transactions %}
         <div class="transactions-container">
-            {% for month, trans in grouped_transactions|dictsort(true, "key") %}
+            {% for month, trans in grouped_transactions.items() %}
                 <div class="month-group">
                     <h3 class="month-header">{{ month }}</h3>
                     {% for transaction in trans %}

@@ -24,15 +24,6 @@ db.init_app(app)
 with app.app_context():
     db.create_all()  # Create database tables
 
-# Group transactions by month (YYYY-MM)
-grouped_transactions = defaultdict(list)
-for t in transactions:
-    month = t.date.strip()[:7]
-    grouped_transactions[month].append(t)
-
-# Optionally, sort the dictionary by month in descending order:
-sorted_grouped_transactions = dict(sorted(grouped_transactions.items(), reverse=True))
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -111,6 +102,14 @@ def home():
     print("DEBUG: Chart JSON Data:", chart_json)
     print("DEBUG: Category JSON Data:", category_json)
     print("DEBUG: Line Chart JSON Data:", line_chart_json)
+
+    grouped_transactions = defaultdict(list)
+    for t in transactions:
+        month = t.date.strip()[:7]
+        grouped_transactions[month].append(t)
+
+    # No sorting or ascending
+    sorted_grouped_transactions = dict(sorted(grouped_transactions.items(), reverse=True))
 
     return render_template(
         'index.html',
