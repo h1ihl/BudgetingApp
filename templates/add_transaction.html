@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Transaction</title>
+</head>
+<body>
+    <h1>Add a New Transaction</h1>
+    <form action="{{ url_for('add_transaction') }}" method="post">
+        <label for="date">Date (YYYY-MM-DD):</label><br>
+        <input type="text" id="date" name="date" required><br><br>
+
+        <label for="category">Category:</label><br>
+        <input type="text" id="category" name="category" required><br><br>
+
+        <label for="amount">Amount:</label><br>
+        <input type="number" id="amount" name="amount" step="0.01" required><br><br>
+
+        <label for="type">Type:</label><br>
+        <select id="type" name="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select><br><br>
+
+        <input type="submit" value="Add Transaction">
+    </form>
+    <br>
+    <a href="{{ url_for('home') }}">Back to Home</a>
+</body>
+</html>

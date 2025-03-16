@@ -8,5 +8,17 @@
 <body>
     <h1>Welcome to the Budget Tracker App</h1>
     <p>Add and track your expenses here!</p>
+    <a href="{{ url_for('add_transaction') }}">Add New Transaction</a>
+
+    <h2>Transactions</h2>
+    {% if transactions %}
+        <ul>
+            {% for transaction in transactions %}
+                <li>{{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No transactions found.</p>
+    {% endif %}
 </body>
 </html>
