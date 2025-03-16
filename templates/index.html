@@ -97,15 +97,27 @@
 
     <h2>Transactions</h2>
     {% if transactions %}
-        <ul>
-            {% for transaction in transactions %}
-                <li>
-                    {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
-                    | <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}">Edit</a>
-                    | <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}">Delete</a>
-                </li>
+        {% set current_month = "" %}
+        <div class="transactions-container">
+            {% for transaction in transactions | sort(attribute="date", reverse=True) %}
+                {% set transaction_month = transaction.date[:7] %}  {# Extract YYYY-MM #}
+
+                {% if transaction_month != current_month %}
+                    <h3 class="month-header">{{ transaction.date[:7] }}</h3>
+                    {% set current_month = transaction_month %}
+                {% endif %}
+
+                <div class="transaction-box">
+                    <span class="transaction-text {% if transaction.type == 'income' %}income{% else %}expense{% endif %}">
+                        {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
+                    </span>
+                    <span>
+                    <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}" class="edit-link">Edit</a> |
+                    <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" class="delete-link">Delete</a>
+                    </span>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
         <p>No transactions found.</p>
     {% endif %}
