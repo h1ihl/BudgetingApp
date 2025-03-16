@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for
 from models import db, Transaction
 import plotly.express as px
 import json
+import io
+import csv
+from flask import make_response
 
 app = Flask(__name__)
 
@@ -91,6 +94,27 @@ def edit_transaction(transaction_id):
         return redirect(url_for('home'))
     return render_template('edit_transaction.html', transaction=transaction)
 
+@app.route('/export')
+def export_csv():
+    # Optionally, you can also apply filtering by type here if needed.
+    transactions = Transaction.query.all()
+
+    # Create an in-memory text stream to write CSV data.
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write CSV header
+    writer.writerow(["ID", "Date", "Category", "Amount", "Type"])
+
+    # Write data rows
+    for t in transactions:
+        writer.writerow([t.id, t.date, t.category, t.amount, t.type])
+
+    # Create a response with the CSV data, and set headers for file download.
+    response = make_response(output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=transactions.csv"
+    response.headers["Content-Type"] = "text/csv"
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
