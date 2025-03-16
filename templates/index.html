@@ -14,7 +14,12 @@
     {% if transactions %}
         <ul>
             {% for transaction in transactions %}
-                <li>{{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}</li>
+                <li>
+                    {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
+                    |
+                    <!-- NEW: Delete Link -->
+                    <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}">Delete</a>
+                </li>
             {% endfor %}
         </ul>
     {% else %}
@@ -22,3 +27,4 @@
     {% endif %}
 </body>
 </html>
+

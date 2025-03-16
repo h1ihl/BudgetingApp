@@ -24,12 +24,24 @@ def add_transaction():
         category = request.form.get('category')
         amount = request.form.get('amount')
         type_val = request.form.get('type')
-        # Create a new Transaction record
-        new_transaction = Transaction(date=date, category=category, amount=float(amount), type=type_val)
+        new_transaction = Transaction(
+            date=date,
+            category=category,
+            amount=float(amount),
+            type=type_val
+        )
         db.session.add(new_transaction)
         db.session.commit()
         return redirect(url_for('home'))
     return render_template('add_transaction.html')
+
+# NEW: Route to delete a transaction by ID
+@app.route('/delete/<int:transaction_id>', methods=['GET'])
+def delete_transaction(transaction_id):
+    transaction_to_delete = Transaction.query.get_or_404(transaction_id)
+    db.session.delete(transaction_to_delete)
+    db.session.commit()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
