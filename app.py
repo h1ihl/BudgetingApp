@@ -15,6 +15,7 @@ login_manager.login_view = 'login'
 # Configure SQLite Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'your-unique-secret-key'
 
 db.init_app(app)
 
