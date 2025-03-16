@@ -17,30 +17,41 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    transactions = Transaction.query.all()
+    # Get the query parameter, e.g., ?type_filter=income
+    type_filter = request.args.get('type_filter', 'all').lower()
 
+    # Query all transactions
+    query = Transaction.query
+
+    # Filter if 'income' or 'expense' is selected
+    if type_filter in ['income', 'expense']:
+        query = query.filter(Transaction.type.ilike(type_filter))
+
+    transactions = query.all()
+
+    # Calculate summary stats
     total_income = sum(t.amount for t in transactions if t.type.lower() == 'income')
     total_expense = sum(t.amount for t in transactions if t.type.lower() == 'expense')
+    net_balance = total_income - total_expense
 
+    # Prepare data for Plotly chart
     chart_data = [
         {"category": "Income", "amount": total_income},
         {"category": "Expenses", "amount": total_expense}
     ]
-
-    # Ensure it's a properly formatted JSON array
     chart_json = json.dumps(chart_data, ensure_ascii=False)
 
-    print("DEBUG: Chart JSON Data:", chart_json)  # 👀 Check this in terminal
+    print("DEBUG: Chart JSON Data:", chart_json)
 
     return render_template(
         'index.html',
         transactions=transactions,
         total_income=total_income,
         total_expense=total_expense,
-        net_balance=total_income - total_expense,
-        chart_json=chart_json
+        net_balance=net_balance,
+        chart_json=chart_json,
+        type_filter=type_filter  # Pass the current filter to the template
     )
-
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_transaction():

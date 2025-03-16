@@ -11,6 +11,17 @@
     <p>Add and track your expenses here!</p>
     <a href="{{ url_for('add_transaction') }}">Add New Transaction</a>
 
+    <!-- Filter Form -->
+    <form action="{{ url_for('home') }}" method="get" style="margin-top: 1rem;">
+        <label for="type_filter">Show:</label>
+        <select id="type_filter" name="type_filter">
+            <option value="all" {% if type_filter == 'all' %}selected{% endif %}>All</option>
+            <option value="income" {% if type_filter == 'income' %}selected{% endif %}>Income</option>
+            <option value="expense" {% if type_filter == 'expense' %}selected{% endif %}>Expense</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
     <!-- Summary Section -->
     <h2>Summary</h2>
     <p>Total Income: ${{ total_income }}</p>
@@ -21,23 +32,21 @@
     <h2>Income vs Expenses</h2>
     <div id="chart"></div>
     <script>
-    var chartData = {{ chart_json | safe }};  // No need for JSON.parse now
+        var chartData = {{ chart_json | safe }};
+        console.log("Chart Data Debug:", chartData);
 
-    console.log("Chart Data Debug:", chartData);  // Debugging line
+        if (Array.isArray(chartData)) {
+            var data = [{
+                x: chartData.map(d => d.category),
+                y: chartData.map(d => d.amount),
+                type: 'bar'
+            }];
 
-    if (Array.isArray(chartData)) {
-        var data = [{
-            x: chartData.map(d => d.category),
-            y: chartData.map(d => d.amount),
-            type: 'bar'
-        }];
-
-        Plotly.newPlot('chart', data, { title: 'Income vs Expenses' });
-    } else {
-        console.error("chartData is not an array:", chartData);
-    }
+            Plotly.newPlot('chart', data, { title: 'Income vs Expenses' });
+        } else {
+            console.error("chartData is not an array:", chartData);
+        }
     </script>
-
 
     <h2>Transactions</h2>
     {% if transactions %}
