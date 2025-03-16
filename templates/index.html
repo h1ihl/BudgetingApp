@@ -80,6 +80,32 @@
         }
     </script>
 
+        <!-- Monthly Overview Line Chart -->
+    <h2>Monthly Overview</h2>
+    <div id="line-chart"></div>
+    <script>
+        var lineChartData = {{ line_chart_json | safe }};
+        console.log("Line Chart Data Debug:", lineChartData);
+
+        if (lineChartData.months && lineChartData.months.length > 0) {
+            var incomeTrace = {
+                x: lineChartData.months,
+                y: lineChartData.income,
+                mode: 'lines+markers',
+                name: 'Income'
+            };
+            var expenseTrace = {
+                x: lineChartData.months,
+                y: lineChartData.expense,
+                mode: 'lines+markers',
+                name: 'Expenses'
+            };
+            Plotly.newPlot('line-chart', [incomeTrace, expenseTrace], { title: 'Monthly Overview' });
+        } else {
+            console.error("Line chart data is not valid:", lineChartData);
+        }
+    </script>
+
     <h2>Transactions</h2>
     {% if transactions %}
         <ul>

@@ -7,6 +7,8 @@ import csv
 from flask import make_response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import User
+import datetime
+from collections import defaultdict
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
@@ -76,8 +78,30 @@ def home():
     category_data = [{"category": cat, "amount": amt} for cat, amt in category_breakdown.items()]
     category_json = json.dumps(category_data, ensure_ascii=False)
 
+    # Compute monthly overview for a line chart
+    monthly_totals = defaultdict(lambda: {"income": 0, "expense": 0})
+    for t in transactions:
+        try:
+            dt = datetime.datetime.strptime(t.date, "%Y-%m-%d")
+            month = dt.strftime("%Y-%m")
+            if t.type.lower() == "income":
+                monthly_totals[month]["income"] += t.amount
+            elif t.type.lower() == "expense":
+                monthly_totals[month]["expense"] += t.amount
+        except Exception as e:
+            print("Error parsing date:", t.date, e)
+
+    sorted_months = sorted(monthly_totals.keys())
+    line_chart_data = {
+        "months": sorted_months,
+        "income": [monthly_totals[m]["income"] for m in sorted_months],
+        "expense": [monthly_totals[m]["expense"] for m in sorted_months],
+    }
+    line_chart_json = json.dumps(line_chart_data, ensure_ascii=False)
+
     print("DEBUG: Chart JSON Data:", chart_json)
     print("DEBUG: Category JSON Data:", category_json)
+    print("DEBUG: Line Chart JSON Data:", line_chart_json)
 
     return render_template(
         'index.html',
@@ -89,7 +113,8 @@ def home():
         type_filter=type_filter,
         category_json=category_json,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        line_chart_json=line_chart_json  # Pass the monthly overview data
     )
 
 @app.route('/add', methods=['GET', 'POST'])
