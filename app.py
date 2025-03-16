@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from models import db, Transaction
+import plotly.express as px
+import json
 
 app = Flask(__name__)
 
@@ -12,18 +14,31 @@ db.init_app(app)
 with app.app_context():
     db.create_all()  # Create database tables
 
+
 @app.route('/')
 def home():
     transactions = Transaction.query.all()
+
     total_income = sum(t.amount for t in transactions if t.type.lower() == 'income')
     total_expense = sum(t.amount for t in transactions if t.type.lower() == 'expense')
-    net_balance = total_income - total_expense
+
+    chart_data = [
+        {"category": "Income", "amount": total_income},
+        {"category": "Expenses", "amount": total_expense}
+    ]
+
+    # Ensure it's a properly formatted JSON array
+    chart_json = json.dumps(chart_data, ensure_ascii=False)
+
+    print("DEBUG: Chart JSON Data:", chart_json)  # 👀 Check this in terminal
+
     return render_template(
         'index.html',
         transactions=transactions,
         total_income=total_income,
         total_expense=total_expense,
-        net_balance=net_balance
+        net_balance=total_income - total_expense,
+        chart_json=chart_json
     )
 
 

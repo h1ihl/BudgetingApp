@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
 <body>
     <h1>Welcome to the Budget Tracker App</h1>
@@ -15,6 +16,28 @@
     <p>Total Income: ${{ total_income }}</p>
     <p>Total Expenses: ${{ total_expense }}</p>
     <p>Net Balance: ${{ net_balance }}</p>
+
+    <!-- Income vs Expenses Chart -->
+    <h2>Income vs Expenses</h2>
+    <div id="chart"></div>
+    <script>
+    var chartData = {{ chart_json | safe }};  // No need for JSON.parse now
+
+    console.log("Chart Data Debug:", chartData);  // Debugging line
+
+    if (Array.isArray(chartData)) {
+        var data = [{
+            x: chartData.map(d => d.category),
+            y: chartData.map(d => d.amount),
+            type: 'bar'
+        }];
+
+        Plotly.newPlot('chart', data, { title: 'Income vs Expenses' });
+    } else {
+        console.error("chartData is not an array:", chartData);
+    }
+    </script>
+
 
     <h2>Transactions</h2>
     {% if transactions %}
