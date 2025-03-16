@@ -218,5 +218,17 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        # Update password if provided
+        new_password = request.form.get('new_password')
+        if new_password:
+            current_user.set_password(new_password)
+            db.session.commit()
+            return redirect(url_for('profile'))
+    return render_template('profile.html', user=current_user)
+
 if __name__ == '__main__':
     app.run(debug=True)
