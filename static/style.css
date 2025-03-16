@@ -53,3 +53,80 @@ button:hover, input[type="submit"]:hover {
 #chart, #pie-chart {
     margin: 20px 0;
 }
+
+/* Apply styles to the entire page */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container for centering the main content */
+.container {
+    width: 80%;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Improve headings */
+h1, h2 {
+    color: #007BFF;
+}
+
+/* Style links */
+a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+button, input[type="submit"] {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Form styling */
+form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    display: inline-block;
+    text-align: left;
+    margin-top: 10px;
+}
+
+/* Input fields */
+input, select {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Center the chart */
+#chart, #pie-chart, #line-chart {
+    margin: 20px auto;
+    width: 90%;
+    max-width: 700px;
+}

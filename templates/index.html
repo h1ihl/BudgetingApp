@@ -8,60 +8,53 @@
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
 <body>
+
+<div class="container">
     <h1>Welcome to the Budget Tracker App</h1>
     <p>Add and track your expenses here!</p>
-    <a href="{{ url_for('add_transaction') }}">Add New Transaction</a>
 
     <p>
-    <a href="{{ url_for('profile') }}">Profile</a> |
-    <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('profile') }}">Profile</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
     </p>
 
+    <a href="{{ url_for('add_transaction') }}" class="button">Add New Transaction</a>
+    <br><br>
+    <a href="{{ url_for('export_csv') }}" class="button">Export Transactions to CSV</a>
+
     <!-- Filter Form -->
-    <form action="{{ url_for('home') }}" method="get" style="margin-top: 1rem;">
+    <form action="{{ url_for('home') }}" method="get">
         <label for="type_filter">Show:</label>
         <select id="type_filter" name="type_filter">
             <option value="all" {% if type_filter == 'all' %}selected{% endif %}>All</option>
             <option value="income" {% if type_filter == 'income' %}selected{% endif %}>Income</option>
             <option value="expense" {% if type_filter == 'expense' %}selected{% endif %}>Expense</option>
         </select>
-        &nbsp;&nbsp;
         <label for="start_date">Start Date:</label>
         <input type="date" id="start_date" name="start_date" value="{{ start_date or '' }}">
-        &nbsp;&nbsp;
         <label for="end_date">End Date:</label>
         <input type="date" id="end_date" name="end_date" value="{{ end_date or '' }}">
-        &nbsp;&nbsp;
         <button type="submit">Filter</button>
     </form>
 
-
-    <!-- Export CSV Link -->
-    <p><a href="{{ url_for('export_csv') }}">Export Transactions to CSV</a></p>
-
     <!-- Summary Section -->
     <h2>Summary</h2>
-    <p>Total Income: ${{ total_income }}</p>
-    <p>Total Expenses: ${{ total_expense }}</p>
-    <p>Net Balance: ${{ net_balance }}</p>
+    <p><strong>Total Income:</strong> ${{ total_income }}</p>
+    <p><strong>Total Expenses:</strong> ${{ total_expense }}</p>
+    <p><strong>Net Balance:</strong> ${{ net_balance }}</p>
 
     <!-- Income vs Expenses Chart -->
     <h2>Income vs Expenses</h2>
     <div id="chart"></div>
     <script>
         var chartData = {{ chart_json | safe }};
-        console.log("Chart Data Debug:", chartData);
-
         if (Array.isArray(chartData)) {
             var data = [{
                 x: chartData.map(d => d.category),
                 y: chartData.map(d => d.amount),
                 type: 'bar'
             }];
-
             Plotly.newPlot('chart', data, { title: 'Income vs Expenses' });
-        } else {
-            console.error("chartData is not an array:", chartData);
         }
     </script>
 
@@ -70,28 +63,21 @@
     <div id="pie-chart"></div>
     <script>
         var categoryData = {{ category_json | safe }};
-        console.log("Category Data Debug:", categoryData);
-
         if (Array.isArray(categoryData) && categoryData.length > 0) {
             var pieData = [{
                 labels: categoryData.map(d => d.category),
                 values: categoryData.map(d => d.amount),
                 type: 'pie'
             }];
-
             Plotly.newPlot('pie-chart', pieData, { title: 'Expenses by Category' });
-        } else {
-            console.error("categoryData is not valid:", categoryData);
         }
     </script>
 
-        <!-- Monthly Overview Line Chart -->
+    <!-- Monthly Overview Line Chart -->
     <h2>Monthly Overview</h2>
     <div id="line-chart"></div>
     <script>
         var lineChartData = {{ line_chart_json | safe }};
-        console.log("Line Chart Data Debug:", lineChartData);
-
         if (lineChartData.months && lineChartData.months.length > 0) {
             var incomeTrace = {
                 x: lineChartData.months,
@@ -106,8 +92,6 @@
                 name: 'Expenses'
             };
             Plotly.newPlot('line-chart', [incomeTrace, expenseTrace], { title: 'Monthly Overview' });
-        } else {
-            console.error("Line chart data is not valid:", lineChartData);
         }
     </script>
 
@@ -125,5 +109,7 @@
     {% else %}
         <p>No transactions found.</p>
     {% endif %}
+</div>
+
 </body>
 </html>
