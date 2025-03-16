@@ -12,6 +12,11 @@
     <p>Add and track your expenses here!</p>
     <a href="{{ url_for('add_transaction') }}">Add New Transaction</a>
 
+    <p>
+    <a href="{{ url_for('profile') }}">Profile</a> |
+    <a href="{{ url_for('logout') }}">Logout</a>
+    </p>
+
     <!-- Filter Form -->
     <form action="{{ url_for('home') }}" method="get" style="margin-top: 1rem;">
         <label for="type_filter">Show:</label>
