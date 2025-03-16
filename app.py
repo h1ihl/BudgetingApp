@@ -24,6 +24,15 @@ db.init_app(app)
 with app.app_context():
     db.create_all()  # Create database tables
 
+# Group transactions by month (YYYY-MM)
+grouped_transactions = defaultdict(list)
+for t in transactions:
+    month = t.date.strip()[:7]
+    grouped_transactions[month].append(t)
+
+# Optionally, sort the dictionary by month in descending order:
+sorted_grouped_transactions = dict(sorted(grouped_transactions.items(), reverse=True))
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -106,6 +115,7 @@ def home():
     return render_template(
         'index.html',
         transactions=transactions,
+        grouped_transactions=sorted_grouped_transactions,  # New
         total_income=total_income,
         total_expense=total_expense,
         net_balance=net_balance,
@@ -114,7 +124,7 @@ def home():
         category_json=category_json,
         start_date=start_date,
         end_date=end_date,
-        line_chart_json=line_chart_json  # Pass the monthly overview data
+        line_chart_json=line_chart_json
     )
 
 @app.route('/add', methods=['GET', 'POST'])
