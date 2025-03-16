@@ -5,8 +5,12 @@ import json
 import io
 import csv
 from flask import make_response
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from models import User
 
 app = Flask(__name__)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
 # Configure SQLite Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
@@ -16,6 +20,10 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()  # Create database tables
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 @app.route('/')
@@ -85,6 +93,7 @@ def home():
 
 
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_transaction():
     if request.method == 'POST':
         date = request.form.get('date')
@@ -95,24 +104,28 @@ def add_transaction():
             date=date,
             category=category,
             amount=float(amount),
-            type=type_val
+            type=type_val,
+            user_id=current_user.id  # Associate transaction with current user
         )
         db.session.add(new_transaction)
         db.session.commit()
         return redirect(url_for('home'))
     return render_template('add_transaction.html')
 
-# NEW: Route to delete a transaction by ID
 @app.route('/delete/<int:transaction_id>', methods=['GET'])
+@login_required
 def delete_transaction(transaction_id):
-    transaction_to_delete = Transaction.query.get_or_404(transaction_id)
+    # Only allow deletion if the transaction belongs to the current user
+    transaction_to_delete = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first_or_404()
     db.session.delete(transaction_to_delete)
     db.session.commit()
     return redirect(url_for('home'))
 
 @app.route('/edit/<int:transaction_id>', methods=['GET', 'POST'])
+@login_required
 def edit_transaction(transaction_id):
-    transaction = Transaction.query.get_or_404(transaction_id)
+    # Only allow editing if the transaction belongs to the current user
+    transaction = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first_or_404()
     if request.method == 'POST':
         transaction.date = request.form.get('date')
         transaction.category = request.form.get('category')
@@ -143,6 +156,40 @@ def export_csv():
     response.headers["Content-Disposition"] = "attachment; filename=transactions.csv"
     response.headers["Content-Type"] = "text/csv"
     return response
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if User.query.filter_by(username=username).first():
+            return "Username already exists"  # You can improve error handling
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user)
+        return redirect(url_for('home'))
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for('home'))
+        else:
+            return "Invalid username or password"  # Improve with proper error messages
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
