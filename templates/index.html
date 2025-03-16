@@ -100,7 +100,7 @@
         {% set current_month = None %}
         <div class="transactions-container">
             {% for transaction in transactions | sort(attribute="date", reverse=True) %}
-                {% set transaction_month = transaction.date[:7] %}  {# Extract YYYY-MM #}
+                {% set transaction_month = transaction.date.strip()[:7] %}
 
                 {% if transaction_month != current_month %}
                     {% if current_month is not none %}
