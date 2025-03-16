@@ -27,14 +27,15 @@ def load_user(user_id):
 
 
 @app.route('/')
+@login_required
 def home():
     # Get the query parameters
     type_filter = request.args.get('type_filter', 'all').lower()
     start_date = request.args.get('start_date', None)
     end_date = request.args.get('end_date', None)
 
-    # Query all transactions
-    query = Transaction.query
+    # Query only transactions for the logged-in user
+    query = Transaction.query.filter_by(user_id=current_user.id)
 
     # Filter by type if specified
     if type_filter in ['income', 'expense']:
@@ -84,13 +85,11 @@ def home():
         total_expense=total_expense,
         net_balance=net_balance,
         chart_json=chart_json,
-        type_filter=type_filter,  # Pass the current filter to the template
+        type_filter=type_filter,
         category_json=category_json,
-        start_date=start_date,    # Pass the date range values to template
+        start_date=start_date,
         end_date=end_date
     )
-
-
 
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
@@ -115,8 +114,9 @@ def add_transaction():
 @app.route('/delete/<int:transaction_id>', methods=['GET'])
 @login_required
 def delete_transaction(transaction_id):
-    # Only allow deletion if the transaction belongs to the current user
-    transaction_to_delete = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first_or_404()
+    transaction_to_delete = Transaction.query.get_or_404(transaction_id)
+    if transaction_to_delete.user_id != current_user.id:
+        return "You are not authorized to delete this transaction", 403
     db.session.delete(transaction_to_delete)
     db.session.commit()
     return redirect(url_for('home'))
@@ -124,8 +124,9 @@ def delete_transaction(transaction_id):
 @app.route('/edit/<int:transaction_id>', methods=['GET', 'POST'])
 @login_required
 def edit_transaction(transaction_id):
-    # Only allow editing if the transaction belongs to the current user
-    transaction = Transaction.query.filter_by(id=transaction_id, user_id=current_user.id).first_or_404()
+    transaction = Transaction.query.get_or_404(transaction_id)
+    if transaction.user_id != current_user.id:
+        return "You are not authorized to edit this transaction", 403
     if request.method == 'POST':
         transaction.date = request.form.get('date')
         transaction.category = request.form.get('category')
