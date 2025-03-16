@@ -15,7 +15,17 @@ with app.app_context():
 @app.route('/')
 def home():
     transactions = Transaction.query.all()
-    return render_template('index.html', transactions=transactions)
+    total_income = sum(t.amount for t in transactions if t.type.lower() == 'income')
+    total_expense = sum(t.amount for t in transactions if t.type.lower() == 'expense')
+    net_balance = total_income - total_expense
+    return render_template(
+        'index.html',
+        transactions=transactions,
+        total_income=total_income,
+        total_expense=total_expense,
+        net_balance=net_balance
+    )
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_transaction():

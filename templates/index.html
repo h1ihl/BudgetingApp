@@ -10,15 +10,19 @@
     <p>Add and track your expenses here!</p>
     <a href="{{ url_for('add_transaction') }}">Add New Transaction</a>
 
+    <!-- Summary Section -->
+    <h2>Summary</h2>
+    <p>Total Income: ${{ total_income }}</p>
+    <p>Total Expenses: ${{ total_expense }}</p>
+    <p>Net Balance: ${{ net_balance }}</p>
+
     <h2>Transactions</h2>
     {% if transactions %}
         <ul>
             {% for transaction in transactions %}
                 <li>
                     {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
-                    |
-                    <!-- NEW: Delete Link -->
-                    <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}">Delete</a>
+                    | <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}">Delete</a>
                 </li>
             {% endfor %}
         </ul>
@@ -27,4 +31,3 @@
     {% endif %}
 </body>
 </html>
-
