@@ -20,8 +20,16 @@
             <option value="income" {% if type_filter == 'income' %}selected{% endif %}>Income</option>
             <option value="expense" {% if type_filter == 'expense' %}selected{% endif %}>Expense</option>
         </select>
+        &nbsp;&nbsp;
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date or '' }}">
+        &nbsp;&nbsp;
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date or '' }}">
+        &nbsp;&nbsp;
         <button type="submit">Filter</button>
     </form>
+
 
     <!-- Export CSV Link -->
     <p><a href="{{ url_for('export_csv') }}">Export Transactions to CSV</a></p>

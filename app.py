@@ -20,15 +20,23 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    # Get the query parameter, e.g., ?type_filter=income
+    # Get the query parameters
     type_filter = request.args.get('type_filter', 'all').lower()
+    start_date = request.args.get('start_date', None)
+    end_date = request.args.get('end_date', None)
 
     # Query all transactions
     query = Transaction.query
 
-    # Filter if 'income' or 'expense' is selected
+    # Filter by type if specified
     if type_filter in ['income', 'expense']:
         query = query.filter(Transaction.type.ilike(type_filter))
+
+    # Filter by date range if provided (assuming YYYY-MM-DD format)
+    if start_date:
+        query = query.filter(Transaction.date >= start_date)
+    if end_date:
+        query = query.filter(Transaction.date <= end_date)
 
     transactions = query.all()
 
@@ -37,14 +45,14 @@ def home():
     total_expense = sum(t.amount for t in transactions if t.type.lower() == 'expense')
     net_balance = total_income - total_expense
 
-    # Prepare data for Plotly chart
+    # Prepare data for Plotly bar chart (Income vs Expenses)
     chart_data = [
         {"category": "Income", "amount": total_income},
         {"category": "Expenses", "amount": total_expense}
     ]
     chart_json = json.dumps(chart_data, ensure_ascii=False)
 
-    # Compute category breakdown for expenses
+    # Compute category breakdown for expenses (for pie chart)
     category_breakdown = {}
     for t in transactions:
         if t.type.lower() == 'expense':
@@ -59,6 +67,7 @@ def home():
     category_json = json.dumps(category_data, ensure_ascii=False)
 
     print("DEBUG: Chart JSON Data:", chart_json)
+    print("DEBUG: Category JSON Data:", category_json)
 
     return render_template(
         'index.html',
@@ -68,8 +77,11 @@ def home():
         net_balance=net_balance,
         chart_json=chart_json,
         type_filter=type_filter,  # Pass the current filter to the template
-        category_json=category_json  # Pass the category breakdown data
+        category_json=category_json,
+        start_date=start_date,    # Pass the date range values to template
+        end_date=end_date
     )
+
 
 
 @app.route('/add', methods=['GET', 'POST'])
