@@ -95,28 +95,34 @@
         }
     </script>
 
-    <h2>Transactions</h2>
+    <h2 class="transactions-title">Transactions</h2>
     {% if transactions %}
-        {% set current_month = "" %}
+        {% set current_month = None %}
         <div class="transactions-container">
             {% for transaction in transactions | sort(attribute="date", reverse=True) %}
                 {% set transaction_month = transaction.date[:7] %}  {# Extract YYYY-MM #}
 
                 {% if transaction_month != current_month %}
-                    <h3 class="month-header">{{ transaction.date[:7] }}</h3>
-                    {% set current_month = transaction_month %}
+                    {% if current_month is not none %}
+                        </div>  {# Close previous month's div #}
+                    {% endif %}
+                    <div class="month-group">
+                        <h3 class="month-header">{{ transaction_month }}</h3>
+                        {% set current_month = transaction_month %}
                 {% endif %}
 
                 <div class="transaction-box">
                     <span class="transaction-text {% if transaction.type == 'income' %}income{% else %}expense{% endif %}">
-                        {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
+                    {{ transaction.date }} - {{ transaction.category }} - ${{ transaction.amount }} - {{ transaction.type }}
                     </span>
                     <span>
-                    <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}" class="edit-link">Edit</a> |
-                    <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" class="delete-link">Delete</a>
+                        <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}" class="edit-link">Edit</a> |
+                        <a href="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" class="delete-link">Delete</a>
                     </span>
                 </div>
+
             {% endfor %}
+            </div>  {# Close the last month's div #}
         </div>
     {% else %}
         <p>No transactions found.</p>
